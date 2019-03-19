@@ -17,10 +17,10 @@ type Player = {
 }
  
 type Board = {
- player1: Player; 
- player2: Player ; 
-// gameState: GameState 
- playerturn:StartingPosition 
+ player1: Player 
+ player2: Player  
+ gameState: GameState
+ //playerturn:StartingPosition 
 }
 
 let getSeeds n board =
@@ -45,19 +45,21 @@ let useHouse n board =
         //This method will be used to avoid manipulation
   let isInCorrectHouse n p=       
     match p with
-    |South ->
+    |South's_turn ->
        match n with
        |1|2|3|4|5|6 ->true
        |_->false
-    |North ->
+    |North's_turn ->
          match n with
          |7|8|9|10|11|12 ->true
          |_-> false  
+    |_-> failwith "ucabangani"
 
-  (*let turn position =
-   match position with
-   |South->North
-   |North->South *)
+  let turn =
+   match board.gameState with
+   |South's_turn->North's_turn
+   |North's_turn->South's_turn
+   |_->failwith "It's a draw"               //to be continued
 
   let setSelectedHouseToZero n board =                      //Making the house choosen zero as the seeds will be distributed
    let (a,b,c,d,f,e)= board.player1.houses_number
@@ -96,11 +98,11 @@ let useHouse n board =
 
   let seedCount = getSeeds n board
 
-  match isInCorrectHouse n board.playerturn with
+  match isInCorrectHouse n board.gameState with
   |false-> board
   |true-> 
   match seedCount with
-  |0->board
+  |0-> board
   |_-> 
   let (a,b,c,d,f,e)= (setSelectedHouseToZero n board).player1.houses_number
   let (q,w,r,t,y,u)= (setSelectedHouseToZero n board).player2.houses_number
@@ -122,18 +124,27 @@ let useHouse n board =
   //Need to add some methods to complete this
   let southplayer= {houses_number=(a,b,c,d,f,e);captured=0}
   let northplayer= {houses_number=(q,w,r,t,y,u);captured=0}
-  {board with player1=southplayer;player2=northplayer;playerturn=South} //Have to fix the playerturn
+  {board with player1=southplayer;player2=northplayer;gameState=turn } //Have to fix the playerturn
           
 
 let start position = 
   let southplayer= {houses_number=(4,4,4,4,4,4);captured=0}
   let northplayer= {houses_number=(4,4,4,4,4,4);captured=0}
-  {Board.player1=southplayer;Board.player2=northplayer;playerturn=position}           //Setting up the board... 
+  let r=match position with 
+         |South->South's_turn
+         |North->North's_turn
+  {Board.player1=southplayer;Board.player2=northplayer;gameState= r}           //Setting up the board... 
 
 
 let score board = failwith "Not implemented"
 
-let gameState board = failwith "Not implemented"
+let gameState board = 
+    match board.gameState with 
+    |South's_turn-> "South's turn"
+    |North's_turn->"North's turn"
+    |Game_Ended_in_a_draw-> "Game_Ended_in_a_draw"
+    |South_won-> "South won"
+    |North_won-> "North won"
 
 [<EntryPoint>]
 let main _ =
