@@ -4,7 +4,23 @@ type StartingPosition =
     | South
     | North
 
-let getSeeds n board = failwith "Not implemented"
+type GameState =
+    | South's_turn
+    | North's_turn
+    | Game_Ended_in_a_draw
+    | South_won
+    | North_won
+
+type Player = {
+ houses_number : int*int*int*int*int*int ; StoreCount : int
+}
+ 
+type Board = {
+ player1: Player; player2: Player ; gameState: GameState 
+}
+
+//let getSeeds n board = 
+ //let hasSeed = Board.house1=1; 
 
 let useHouse n board = failwith "Not implemented"
 
