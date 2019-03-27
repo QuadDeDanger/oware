@@ -19,8 +19,7 @@ type Player = {
 type Board = {
  player1: Player 
  player2: Player  
- gameState: GameState
- //playerturn:StartingPosition 
+ gameState: GameState 
 }
 
 let getSeeds n board =
@@ -38,7 +37,6 @@ let getSeeds n board =
     |10-> t
     |11-> y
     |12-> u
-<<<<<<< HEAD
     |_-> failwith "Number is above or below"
 
 let isInCorrectHouse n p=       
@@ -66,10 +64,8 @@ let turn board=
                  match board.gameState with
                  |South's_turn->North's_turn
                  |North's_turn->South's_turn
-                 |_-> failwith "You"   //to be continued
-=======
-    |_-> failwith "Not implemented"
->>>>>>> 98131d539204c40e48777bcdcc7279db612cf8ed
+                 |_-> failwith "You"   
+
 
 let setSelectedHouseToZero n board =                      //Making the house choosen zero as the seeds will be distributed
    let (a,b,c,d,f,e)= board.player1.houses_number
@@ -88,31 +84,10 @@ let setSelectedHouseToZero n board =                      //Making the house cho
     |11->{board with player2= {board.player2 with houses_number=(q,w,r,t,0,u)}}
     |12->{board with player2= {board.player2 with houses_number=(q,w,r,t,y,0)}}
     |_->failwith "You have reached the limit!"
-<<<<<<< HEAD
- 
-   //Method which adds one to the specified house and returns a updated board
-=======
 
-let isInCorrectHouse n p=       
-    match p with
-    |South's_turn ->
-       match n with
-       |1|2|3|4|5|6 ->true
-       |_->false
-    |North's_turn ->
-         match n with
-         |7|8|9|10|11|12 ->true
-         |_-> false  
-    |_-> failwith "ucabangani"
-
-let turn board =
-   match board.gameState with
-   |South's_turn->North's_turn
-   |North's_turn->South's_turn
-   |_->failwith "It's a draw"               //to be continued
 
 //Method which adds one to the specified house and returns a updated board
->>>>>>> 98131d539204c40e48777bcdcc7279db612cf8ed
+
 let addOneToHouse n (a,b,c,d,f,e,q,w,r,t,y,u)=
     match n with
     |1-> ((a+1),b,c,d,f,e,q,w,r,t,y,u)
@@ -128,35 +103,6 @@ let addOneToHouse n (a,b,c,d,f,e,q,w,r,t,y,u)=
     |11-> (a,b,c,d,f,e,q,w,r,t,(y+1),u)
     |12-> (a,b,c,d,f,e,q,w,r,t,y,(u+1))
     |_-> failwith "Not implemented"
-
-<<<<<<< HEAD
-let ScoreUpdate board score =
- match board.gameState with
-  |North's_turn ->
-                  {board with player1 ={board.player1 with  captured= (score + board.player1.captured) }} // updating South's score
-                         // updating South's board
-  |South's_turn ->
-                  {board with player2 ={board.player1 with  captured= (score + board.player2.captured) }} // updating North's score
-                         // updating North's board
-  |_-> board
-
-let CorrectHouse bd latestHouseNum  =
-    let (a,b,c,d,f,e)= (setSelectedHouseToZero latestHouseNum bd).player1.houses_number
-    let (q,w,r,t,y,u)= (setSelectedHouseToZero latestHouseNum bd).player2.houses_number
-    let rec ToThinkAbout houseFrom b acc =
-        let seedC=getSeeds houseFrom b
-        match isInCorrectHouse latestHouseNum bd.gameState with
-        |false -> ScoreUpdate b acc
-        |true ->
-            match seedC=0 || seedC>12 with
-            |false->
-              match seedC with
-              | 3 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 3)
-              | 2 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 2)
-              |_->ScoreUpdate b acc
-            | _ -> ScoreUpdate b acc
-
-    ToThinkAbout latestHouseNum bd 0
  
 let house n board=
     let seep =getSeeds n board
@@ -164,57 +110,43 @@ let house n board=
     |true->(seep+n)-12
     |_-> seep+n
     
-let useHouse n board = 
-        //This method will be used to avoid manipulation
- 
-  let rig=house n board
-=======
-let HouseToTakeSeedsFrom n =
+let houseToTakeSeedsFrom n =
  match n with
   |1|2|3|4|5|6 -> North
   |_->South
 
 
-let ScoreUpdate board player score =
- let c= board.gameState
- let i= player.captured 
- match c with
+let scoreUpdate board  score =
+ 
+ match board.gameState with
   |South's_turn ->
-                  let v = {player with  captured= (score + i) } // updating South's score
+                  let v = {board.player1 with  captured= (score + board.player1.captured) } // updating South's score
                   {board with player1=v}       // updating South's board
   |North's_turn ->
-                  let w = {player with  captured= (score + i)} // updating North's score
+                  let w = {board.player2 with  captured= (score +  board.player2.captured)} // updating North's score
                   {board with player2=w}       // updating North's board
   |_-> board
 
-let ToPlayer board=
-    let c= board.gameState 
-    match c with
-     |South's_turn -> South
+let toPlayer board=
+    match board.gameState with
+     |South's_turn -> North            
+     |North's_turn -> South
+     |_->failwith "Let's fail with something!"
                   
-     |North's_turn -> North
-                  
-            
-
-
-let CorrectHouse board player latestHouseNum  =
+let correctHouse board latestHouseNum  =
     let rec ToThinkAbout houseFrom b acc =
-        match (ToPlayer b) = (HouseToTakeSeedsFrom houseFrom) with
-        |true -> ScoreUpdate b player acc
+        match (toPlayer b) = (houseToTakeSeedsFrom houseFrom) with
+        |true -> scoreUpdate b acc
         |false ->
             match (getSeeds houseFrom b) with
             | 3 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 3)
             | 2 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 2)
-            | _ -> ScoreUpdate b player acc
+            | _ -> scoreUpdate b acc
     ToThinkAbout latestHouseNum board 0
 
-
-
 let useHouse n board = 
-        //This method will be used to avoid manipulation
->>>>>>> 98131d539204c40e48777bcdcc7279db612cf8ed
   let seedCount = getSeeds n board
-
+  let rig=house n board
   match isInCorrectHouse n board.gameState with
   |false-> board
   |true-> 
@@ -231,89 +163,20 @@ let useHouse n board =
            |13->1                 //This is where we start adding from the first house again as the game has 12 houses/ creating a loop between 1-12
            |_-> n
    match seed<> 0 with
-           |false-> //newhouse                         //Base case of the recursive function: return the new updated board       
+           |false->                         //Base case of the recursive function: return the new updated board       
                    let (a,b,c,d,f,e,q,w,r,t,y,u)=newhouse 
                    let southplayer= {houses_number=(a,b,c,d,f,e);captured=board.player1.captured}
                    let northplayer= {houses_number=(q,w,r,t,y,u);captured=board.player2.captured}
-                   let r= {board with player1=southplayer;player2=northplayer;gameState=turn board}
-                   
-                   let rec score num boad n=
-                    let seedC=getSeeds num boad
-                    match seedC with
-                    |0->boad
-                    |_->
-                    match isInCorrectHouse num boad.gameState with 
-                    |false -> boad
-                    |_-> 
-                         match num=0 || num>12 with 
-                          |true-> boad
-                          |_->
-                            match boad.gameState with
-                            |South's_turn->
-                             match seedC with 
-                              |2|3-> score (num-1) (setSelectedHouseToZero num boad) (n+1)
-                              |_-> boad
-                            |North's_turn->
-                              match seedC with 
-                              |2|3-> score (num-1) (setSelectedHouseToZero num boad) (n+1)
-                              |_-> boad
-                            |_->boad
-                   score rig r 0
+                   let r= {board with player1=southplayer;player2=northplayer;gameState=board.gameState}
+                   correctHouse r rig
            |true->  
               match p=bs with 
               |true->move (p+1) seed newhouse bs    //
               |_->move (p+1) (seed-1) (addOneToHouse p newhouse) bs
 
   let nB= move (n+1) seedCount newBoard n 
-
-  //let southplayer= {houses_number=(a,b,c,d,f,e);captured=0}
-  //let northplayer= {houses_number=(q,w,r,t,y,u);captured=0}
-  nB
-  
-  (*let captureSeeds p board state=
-    let rec count n board=
-        match state with 
-        |South's_turn->
-            match (board.player1.captured=24 && board.player2.captured=24) || board.player1.captured>25 || board.player2.captured>25 with 
-            |true->board
-            |_-> 
-                match n with 
-                |12-> board
-                |_-> 
-                    let seedC=getSeeds n board
-                    match seedC with 
-                    |2|3-> count (n+1) {board with player2= {board.player2 with houses_number=(setSelectedHouseToZero n board).player2.houses_number;captured=board.player2.captured+ seedC}}
-                    |_->count (n+1) board
-        |North's_turn->
-            match (board.player1.captured=24 && board.player2.captured=24) || board.player1.captured>25 || board.player2.captured>25 with 
-            |true->board
-            |_-> 
-                match n with 
-                |7-> board
-                |_-> 
-                    let seedC=getSeeds n board
-                    match seedC with 
-                    |2|3-> count (n+1) {board with player1= {board.player1 with houses_number=(setSelectedHouseToZero n board).player1.houses_number; captured=board.player1.captured+ seedC}}
-                    |_->count (n+1) board
-        |_->failwith "One won!"
-    count p board
-  let q= match nB.gameState with
-         |North's_turn->7
-         |South's_turn->1
-         |_->failwith "dd"
-  captureSeeds q nB nB.gameState*)
-  
-  //Need to add some methods to complete this
-<<<<<<< HEAD
- //Have to fix the playerturn
-          
-=======
-  let southplayer= {houses_number=(a,b,c,d,f,e);captured=0}
-  let northplayer= {houses_number=(q,w,r,t,y,u);captured=0}
-  {board with player1=southplayer;player2=northplayer;gameState=turn board } //Have to fix the playerturn
-  //CorrectHouse board board.player1 n        
->>>>>>> 98131d539204c40e48777bcdcc7279db612cf8ed
-
+  {nB with gameState= turn nB}
+      
 let start position = 
   let southplayer= {houses_number=(4,4,4,4,4,4);captured=0}
   let northplayer= {houses_number=(4,4,4,4,4,4);captured=0}
@@ -322,22 +185,13 @@ let start position =
          |North->North's_turn
   {Board.player1=southplayer;Board.player2=northplayer;gameState= r}           //Setting up the board... 
 
-
-<<<<<<< HEAD
 let score board = board.player1.captured,board.player2.captured
-
-=======
-
-
-
-let score board = (board.player1.captured, board.player2.captured ) // extract number of seeds from players then return a tuple of them, i.e player1.caputured ......
->>>>>>> 98131d539204c40e48777bcdcc7279db612cf8ed
 
 let gameState board = 
     match board.gameState with 
     |South's_turn-> "South's turn"
     |North's_turn->"North's turn"
-    |Game_Ended_in_a_draw-> "Game_Ended_in_a_draw"
+    |Game_Ended_in_a_draw-> "Game ended in a draw"
     |South_won-> "South won"
     |North_won-> "North won"
 
