@@ -112,9 +112,22 @@ let house n board=
     
 let houseToTakeSeedsFrom n =
  match n with
-  |1|2|3|4|5|6 -> North
-  |_->South
+  |1|2|3|4|5|6 -> North's_turn
+  |_->South's_turn
 
+let isPlayerHousesEmpty board = 
+    match board.gameState with
+    |North's_turn->
+        let(a,b,c,d,e,f)=board.player1.houses_number
+        match (a,b,c,d,e,f) with
+        |(0,0,0,0,0,0)->true
+        |_->false
+     |South's_turn->
+        let(a,b,c,d,e,f)=board.player2.houses_number
+        match (a,b,c,d,e,f) with
+        |(0,0,0,0,0,0)->true
+        |_->false
+    |_->false
 
 let scoreUpdate board  score =
  
@@ -129,11 +142,12 @@ let scoreUpdate board  score =
 
 let toPlayer board=
     match board.gameState with
-     |South's_turn -> North            
-     |North's_turn -> South
+     |South's_turn ->North's_turn            
+     |North's_turn -> South's_turn
      |_->failwith "Let's fail with something!"
                   
 let correctHouse board latestHouseNum  =
+    let initialBoard=board
     let rec ToThinkAbout houseFrom b acc =
         match (toPlayer b) = (houseToTakeSeedsFrom houseFrom) with
         |true -> scoreUpdate b acc
@@ -141,7 +155,11 @@ let correctHouse board latestHouseNum  =
             match (getSeeds houseFrom b) with
             | 3 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 3)
             | 2 -> ToThinkAbout (houseFrom - 1) (setSelectedHouseToZero houseFrom b) (acc + 2)
-            | _ -> scoreUpdate b acc
+            | _ -> 
+                match isPlayerHousesEmpty b with
+                |true->scoreUpdate b 0
+                |_->
+                   scoreUpdate b acc
     ToThinkAbout latestHouseNum board 0
 
 let useHouse n board = 
@@ -150,6 +168,9 @@ let useHouse n board =
   match isInCorrectHouse n board.gameState with
   |false-> board
   |true-> 
+  match isPlayerHousesEmpty board with
+  |true->board
+  |_->
   match seedCount with
   |0-> board
   |_-> 
